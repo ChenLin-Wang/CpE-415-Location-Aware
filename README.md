@@ -3,7 +3,6 @@
 This project was developed as part of the **CpE 415 (Embedded Systems / IoT)** course.  
 It demonstrates a complete **IoT-based location tracking system** that allows devices to automatically register, send GPS data to a backend, and visualize their movement on a live map interface.
 
----
 
 ## 📖 Overview
 
@@ -24,7 +23,6 @@ The server stores and visualizes all device locations using Flask, SQLite, and L
 
 ![Screenshot](Screenshot.png)
 
----
 
 ## 🧱 System Architecture
 
@@ -37,7 +35,6 @@ The server stores and visualizes all device locations using Flask, SQLite, and L
 
 Data flows from the ESP32 devices sending GPS data via HTTP POST requests to the Flask backend, which stores the information in the SQLite database and serves it to the web dashboard for real-time visualization.
 
----
 
 ## ⚙️ Technologies Used
 
@@ -49,7 +46,6 @@ Data flows from the ESP32 devices sending GPS data via HTTP POST requests to the
 | **Frontend**  | HTML, JavaScript, Leaflet.js          |
 | **Communication** | HTTP REST (JSON format)             |
 
----
 
 ## 🗃️ Database Schema
 
@@ -71,13 +67,11 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
 );
 ```
 
----------
 
 ## 🧠 Node-Red Workflows
 
 ![node-red](node-red.png)
 
----
 
 ## 🧠 How It Works
 
@@ -91,7 +85,6 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
 
 5. **Frontend Visualization:** The web dashboard fetches the latest device locations from the backend every second and updates the interactive Leaflet map accordingly, showing real-time device positions and movement trails.
 
----
 
 ## 💻 ESP32 Firmware Overview
 
@@ -105,7 +98,6 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
 
 - **Debug Output:** Serial prints provide status updates, including Wi-Fi connection status, GPS readings, and HTTP request results.
 
----
 
 ## 🌐 Web Dashboard
 
@@ -119,7 +111,6 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
 
 - **Responsive Design:** The dashboard is designed to be accessible on various devices, including desktops, tablets, and smartphones.
 
----
 
 ## 🚀 Setup and Deployment
 
@@ -148,7 +139,6 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
    - Open a web browser.
    - Navigate to `http://127.0.0.1:60000` to view the live map and device locations.
 
----
 
 ## 📡 Example Serial Output
 
@@ -164,7 +154,6 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
 [INFO] Waiting 1000ms before next update...
 ```
 
----
 
 ## 📚 Future Improvements
 
