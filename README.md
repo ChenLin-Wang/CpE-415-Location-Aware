@@ -22,6 +22,8 @@ The server stores and visualizes all device locations using Flask, SQLite, and L
 - Responsive web interface using Leaflet and OpenStreetMap.
 - Frontend updates device positions every second without reloading the page.
 
+![Screenshot](Screenshot.png)
+
 ---
 
 ## 🧱 System Architecture
@@ -68,6 +70,12 @@ CREATE TABLE IF NOT EXISTS "device_locations" (
   FOREIGN KEY (device_id) REFERENCES "devices" (id)
 );
 ```
+
+---------
+
+## 🧠 Node-Red Workflows
+
+![node-red](node-red.png)
 
 ---
 
