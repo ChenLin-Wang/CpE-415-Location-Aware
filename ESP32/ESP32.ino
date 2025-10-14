@@ -87,7 +87,7 @@ void sendLocation(double lat, double lon) {
   }
 }
 
-// 模拟随机移动
+// Simulate random movement
 void simulateMovement(double &lat, double &lon, double maxDistanceMeters = 30.0) {
   const double earthRadius = 6371000.0;
   double distance = ((double)rand() / RAND_MAX) * maxDistanceMeters;
@@ -114,10 +114,10 @@ void loop() {
   if (currentMillis - lastSendTime >= sendInterval) {
     lastSendTime = currentMillis;
 
-    // 发送位置到 Node-RED
+    // Send location to Node-RED
     sendLocation(latitude, longitude);
 
-    // 模拟移动
+    // Simulate movement
     simulateMovement(latitude, longitude, 30);
   }
 }
