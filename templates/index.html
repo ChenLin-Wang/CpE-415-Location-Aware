@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IoT Device Tracker</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; width: 100%; font-family: Arial, sans-serif;
+      display: flex;
+      overflow: hidden;
+    }
+    #device-list {
+      width: 300px;
+      height: 100%;
+      overflow-y: auto;
+      border-right: 1px solid #ccc;
+      box-sizing: border-box;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    #device-list h2 {
+      margin-top: 0;
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+    #device-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #device-list li {
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      word-break: break-word;
+    }
+    #device-list li:hover {
+      background-color: #e6f0ff;
+    }
+    #device-list li.active {
+      background-color: #cce0ff;
+      border-color: #3399ff;
+    }
+    #map {
+      flex: 1;
+      height: 100%;
+    }
+    .device-popup {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="device-list">
+    <h2>Device List</h2>
+    <ul id="devices"></ul>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = {};
+    let devicesData = [];
+    let activeDeviceId = null;
+
+    const devicesListEl = document.getElementById('devices');
+
+    function createDeviceListItem(device) {
+      const li = document.createElement('li');
+      li.textContent = `${device.name}`;
+      li.dataset.deviceId = device.device_id;
+      li.title = device.description || '';
+
+      li.addEventListener('click', () => {
+        if (!markers[device.device_id]) return;
+        activeDeviceId = device.device_id;
+        setActiveDevice(device.device_id);
+        // Instantly move marker to device location to avoid lag
+        markers[device.device_id].setLatLng([device.latitude, device.longitude]);
+        // Zoom out to 5 first, then zoom in to target zoom
+        const targetZoom = Math.min(Math.max(map.getZoom(), 15), 18);
+        map.flyTo([device.latitude, device.longitude], 5, {
+          duration: 0.7
+        });
+        setTimeout(() => {
+          map.flyTo([device.latitude, device.longitude], targetZoom);
+          markers[device.device_id].openPopup();
+        }, 700);
+      });
+
+      return li;
+    }
+
+    function setActiveDevice(deviceId) {
+      activeDeviceId = deviceId;
+      Array.from(devicesListEl.children).forEach(li => {
+        li.classList.toggle('active', li.dataset.deviceId === deviceId);
+      });
+    }
+
+    function updateDeviceList() {
+      devicesListEl.innerHTML = '';
+      const filteredDevices = devicesData;
+
+      filteredDevices.forEach(device => {
+        const li = createDeviceListItem(device);
+        devicesListEl.appendChild(li);
+      });
+
+      if (activeDeviceId && !filteredDevices.some(d => d.device_id === activeDeviceId)) {
+        activeDeviceId = null;
+      }
+
+      if (!activeDeviceId && filteredDevices.length > 0) {
+        setActiveDevice(filteredDevices[0].device_id);
+      }
+    }
+
+    // Smoothly move marker to new position, duration in ms
+    function smoothMoveMarker(marker, newLatLng, duration = 1000) {
+      const startLatLng = marker.getLatLng();
+      const startTime = performance.now();
+
+      function animate() {
+        const now = performance.now();
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+
+        const lat = startLatLng.lat + (newLatLng.lat - startLatLng.lat) * t;
+        const lng = startLatLng.lng + (newLatLng.lng - startLatLng.lng) * t;
+        marker.setLatLng([lat, lng]);
+
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      animate();
+    }
+
+    function updateMarkers() {
+      const filteredDevices = devicesData;
+
+      // Remove markers for devices no longer present
+      Object.keys(markers).forEach(id => {
+        if (!devicesData.some(d => d.device_id === id)) {
+          map.removeLayer(markers[id]);
+          delete markers[id];
+        }
+      });
+
+      filteredDevices.forEach(device => {
+        const popupContent = `
+          <div class="device-popup">
+            <b>${device.name}</b><br>
+            ${device.description ? device.description + '<br>' : ''}
+            Device ID: ${device.device_id}<br>
+            Latitude: ${device.latitude.toFixed(6)}<br>
+            Longitude: ${device.longitude.toFixed(6)}
+          </div>
+        `;
+        const newLatLng = L.latLng(device.latitude, device.longitude);
+        if (markers[device.device_id]) {
+          // Smoothly move marker to new position and update popup content
+          smoothMoveMarker(markers[device.device_id], newLatLng);
+          markers[device.device_id].getPopup().setContent(popupContent);
+        } else {
+          // Add new marker
+          const marker = L.marker(newLatLng).addTo(map);
+          marker.bindPopup(popupContent);
+          marker.on('click', () => {
+            setActiveDevice(device.device_id);
+            activeDeviceId = device.device_id;
+            // Zoom out to 5 first, then zoom in to target zoom
+            const targetZoom = Math.min(Math.max(map.getZoom(), 15), 18);
+            map.flyTo(newLatLng, 5, {
+              duration: 0.7
+            });
+            setTimeout(() => {
+              map.flyTo(newLatLng, targetZoom);
+              marker.openPopup();
+            }, 700);
+          });
+          markers[device.device_id] = marker;
+        }
+      });
+
+      // Keep the popup of the active device open without forcing map center or zoom
+      if (activeDeviceId && markers[activeDeviceId]) {
+        markers[activeDeviceId].openPopup();
+      }
+    }
+
+    async function fetchDeviceLocations() {
+      try {
+        const res = await fetch('/api/device_locations');
+        if (!res.ok) throw new Error('Network response error');
+        const data = await res.json();
+
+        // Deduplicate: keep the latest record for each device_id
+        const latestById = new Map();
+        for (const entry of data) {
+          if (!latestById.has(entry.device_id)) {
+            latestById.set(entry.device_id, entry);
+          }
+        }
+        devicesData = Array.from(latestById.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+        updateDeviceList();
+        updateMarkers();
+      } catch (err) {
+        console.error('Failed to fetch device locations:', err);
+      }
+    }
+
+    // Initial load
+    fetchDeviceLocations();
+
+    // Refresh device locations every second
+    setInterval(fetchDeviceLocations, 1000);
+  </script>
+</body>
+</html>
