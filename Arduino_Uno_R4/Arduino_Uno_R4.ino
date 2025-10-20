@@ -6,13 +6,13 @@
 TinyGPSPlus gps;
 SoftwareSerial mygps(4, 3);
 
-const char* ssid = "2.4G SSID";
-const char* password = "@20Wangcl01phil";
+const char* ssid = "CL";
+const char* password = "12345678";
 
-const char* serverAddress = "192.168.1.17";
+const char* serverAddress = "192.168.60.45";
 int port = 1880;
 
-double test_lat = 10.6984127, test_lng = 122.5469072;
+double test_lat = 10.69971, test_lng = 122.56288;
 const char* id = "a1b2c3d4-e5f6-47a8-9b0c-123456789abc";
 const char* name = "Arduino Uno Test Device";
 const char* description = "device for testing - Arduino Uno R4 with WIFI";

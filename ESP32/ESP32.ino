@@ -3,10 +3,10 @@
 #include <HardwareSerial.h>
 #include <HTTPClient.h>
 
-const char* ssid = "2.4G SSID";
-const char* password = "@20Wangcl01phil";
+const char* ssid = "CL";
+const char* password = "12345678";
 
-const char* serverUrl = "http://192.168.1.17:1880";
+const char* serverUrl = "http://192.168.60.45:1880";
 
 const char* deviceId = "e5f6a7b8-1234-4cde-89ab-9876543210ab";
 const char* deviceName = "ESP32 Test Device";
@@ -18,8 +18,9 @@ const int RXPin = 16;  // GPS TX → ESP32 RX1
 const int TXPin = 17;  // GPS RX → ESP32 TX1
 const uint32_t gpsBaud = 9600;
 
-double latitude = 40.712776;
-double longitude = -74.005974;
+// double latitude = 40.712776;
+// double longitude = -74.005974;
+double latitude = 10.6984127, longitude = 122.5469072;
 
 unsigned long lastSendTime = 0;
 const unsigned long sendInterval = 1000; // 1 second
